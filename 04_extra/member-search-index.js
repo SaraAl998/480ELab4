@@ -1,0 +1,1 @@
+memberSearchIndex = [{"p":"<Unnamed>","c":"StudentHousing","l":"displayHandler()"},{"p":"<Unnamed>","c":"StudentHousing","l":"main(String[])","u":"main(java.lang.String[])"},{"p":"<Unnamed>","c":"StudentHousing","l":"start(Stage)","u":"start(javafx.stage.Stage)"},{"p":"<Unnamed>","c":"StudentHousing","l":"StudentHousing()","u":"%3Cinit%3E()"}];updateSearchResults();
