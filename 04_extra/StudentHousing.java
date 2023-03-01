@@ -148,6 +148,7 @@ public class StudentHousing extends Application {
         }
         for(int i=0; i < remainder; i++){
             Button room_i = new Button("" + roomNum);
+            room_i.setOnAction(e ->populateInfoHolder(Integer.parseInt(room_i.getText())));
             roomNum++;
             room_i.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
             room_grid.add(room_i, i, squareRoot);
@@ -178,11 +179,11 @@ public class StudentHousing extends Application {
         updateButton.setOnAction( e -> updateRoomInfo(roomNum, textfields));
         nav_buttons[0]= updateButton;
 
-        Button exitButton = new Button("Exit");
-        exitButton.setOnAction( e -> exit_room());
-        nav_buttons[1]= exitButton;
+        Button exitRoomButton = new Button("Exit Room");
+        exitRoomButton.setOnAction( e -> exit_room());
+        nav_buttons[1]= exitRoomButton;
 
-        nav_button_holder.getChildren().addAll(updateButton, exitButton);
+        nav_button_holder.getChildren().addAll(updateButton, exitRoomButton);
         info_holder.getChildren().add(nav_button_holder);
         return nav_buttons;
 
