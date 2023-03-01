@@ -28,6 +28,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.util.ArrayList;
 import javafx.scene.layout.Pane;
+import javafx.geometry.Pos;
 
 /**
 * 
@@ -61,29 +62,31 @@ public class StudentHousing extends Application {
     
 /**************** NEW FINAL VARIABLES ADDED ********************************/
     private String[] labels = new String[]{"Room:", "Name:", "Month:", "Payments:"};
-    
-
+    private int roomNum;
+    //private int[] roomNums = new int[]{}
+    private VBox info_holder;
 /*************** START METHOD **********************************************/
     @Override
     /** Initialises the screen 
     *  @param stage:   The scene's stage 
     */
     public void start(Stage stage) {
-        
         noOfRooms = getNumberOfRooms(); // call private method below for window
         // that takes in number of rooms in house 
-        
-        // create the buttons for the rooms
-        // and add them to the room_grid's children
-        GridPane room_grid = new GridPane();
-        ArrayList<Button> roomButtons = create_room_buttons(room_grid, noOfRooms);
-        
+        list = new HousemateList(noOfRooms);
+
         // create a VBox for housemate details textfields
         // and add labels, textfields and buttons inside hboxes
         // and store each button and userInputButtons
-        VBox info_holder = new VBox(10);
-        Button[] userInputButtons = create_user_input_section(info_holder);
-        create_payment_view(info_holder); // adds a ListView of payments to the info_holder
+        info_holder = new VBox(10);
+        //Button[] userInputButtons = create_user_input_section(info_holder);
+        //create_payment_view(info_holder); // adds a ListView of payments to the info_holder
+
+
+        // create the buttons for the rooms
+        // and add them to the room_grid's children
+        GridPane room_grid = new GridPane();
+        ArrayList<Button> roomButtons = create_room_buttons(room_grid, noOfRooms, info_holder);
 
 
         // create HBox for the title and the room_grid
@@ -126,15 +129,17 @@ public class StudentHousing extends Application {
     * Method to create a button for each room in the house
     * @return array of room buttons
     */
-    private ArrayList<Button> create_room_buttons(GridPane room_grid, int noOfRooms){
+    private ArrayList<Button> create_room_buttons(GridPane room_grid, int noOfRooms, VBox info_holder){
         ArrayList<Button> roomButtons = new ArrayList<Button>(noOfRooms);
         int squareRoot = (int)Math.pow(noOfRooms, .5);
-        int remainder = noOfRooms % squareRoot;
-        int roomNum = 1;
+        int remainder = noOfRooms - (int)Math.pow(squareRoot,2);
+        //System.out.println(remainder);
+        roomNum = 1;
         for(int i=0; i<squareRoot;i++){
             for(int j = 0; j < squareRoot;j++){
             //String room_num = Integer.toString(i+1);
             Button room_i = new Button("" + roomNum);
+            room_i.setOnAction(e ->populateInfoHolder(Integer.parseInt(room_i.getText())));
             roomNum++;
             room_i.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
             room_grid.add(room_i, j,i);
@@ -146,9 +151,55 @@ public class StudentHousing extends Application {
             roomNum++;
             room_i.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
             room_grid.add(room_i, i, squareRoot);
+            roomButtons.add(room_i);
         }
+        //roomNum=1;
 
         return roomButtons;
+    }
+
+    private void buttonPressed(Button button, TextField t)
+    {
+        t.setEditable(true);
+    }
+
+    private void populateInfoHolder(int roomNum){
+        int roomNumCopy = roomNum;
+        ArrayList<TextField> textfields = create_user_input_section(roomNumCopy);
+        Button[] nav_buttons = create_nav_buttons(roomNum, textfields);
+        create_payment_view(info_holder);
+    }
+
+    private Button[] create_nav_buttons(int roomNum, ArrayList<TextField> textfields){
+        Button[] nav_buttons = new Button[2];
+        HBox nav_button_holder = new HBox();
+
+        Button updateButton = new Button("Update");
+        updateButton.setOnAction( e -> updateRoomInfo(roomNum, textfields));
+        nav_buttons[0]= updateButton;
+
+        Button exitButton = new Button("Exit");
+        exitButton.setOnAction( e -> exit_room());
+        nav_buttons[1]= exitButton;
+
+        nav_button_holder.getChildren().addAll(updateButton, exitButton);
+        info_holder.getChildren().add(nav_button_holder);
+        return nav_buttons;
+
+    }
+
+    private void updateRoomInfo(int roomNum, ArrayList<TextField> textfields){
+        String name = textfields.get(1).getText();
+        if (!name.isEmpty()){
+            Housemate newHousemate = new Housemate(name, roomNum);
+            list.addHousemate(newHousemate);
+            System.out.println("Added a housemate!");
+        }
+    }
+
+    private void exit_room(){
+        //info_holder = new VBox();
+        info_holder.getChildren().clear();
     }
 
 
@@ -156,23 +207,23 @@ public class StudentHousing extends Application {
     * Method to create text fields for user input
     * @return array of buttons to add user input from corresponding textfields
     */
-    private Button[] create_user_input_section(VBox info_holder){
-        Button[] add_buttons = new Button[(labels.length)];
+    private ArrayList<TextField> create_user_input_section(int roomNum){
+        ArrayList<TextField> textfields = new ArrayList<TextField>(labels.length);
         int buttonNum = 0;
         for(String s: labels){
             Label l = new Label(s);
             TextField t = new TextField("");
-            t.setEditable(false);
-            add_buttons[buttonNum] = new Button("+");
-            
+            if (s.equals("Room:")){t.setEditable(false); t.setText(""+ roomNum);}
+            textfields.add(t);
+
             HBox h = new HBox();
-            h.getChildren().addAll(l, t, add_buttons[buttonNum]);
+            h.getChildren().addAll(l, t);
             buttonNum++;
             info_holder.getChildren().add(h);
-            h.setAlignment(Pos.LEFT);
+            h.setAlignment(Pos.TOP_LEFT);
         }
 
-        return add_buttons;
+        return textfields;
     }
 
 /*************************************** FUNCTIONS GIVEN TO US ********************************************************/
