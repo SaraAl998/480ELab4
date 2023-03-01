@@ -59,9 +59,11 @@ public class StudentHousing extends Application {
     private TextArea displayArea1  = new TextArea();  // bad name, but use in handler code
     private TextArea displayArea2;
     
+/**************** NEW FINAL VARIABLES ADDED ********************************/
+    private String[] labels = new String[]{"Room:", "Name:", "Month:", "Payments:"};
     
-    
-    
+
+/*************** START METHOD **********************************************/
     @Override
     /** Initialises the screen 
     *  @param stage:   The scene's stage 
@@ -105,7 +107,7 @@ public class StudentHousing extends Application {
         
     }
 
-/*************************************** FUNCTIONS WE WROTE ****************************************/
+/*************************************** NEW FUNCTIONS ADDED ****************************************/
 
     /**
     * Method to create a listview of payments
@@ -155,12 +157,12 @@ public class StudentHousing extends Application {
     * @return array of buttons to add user input from corresponding textfields
     */
     private Button[] create_user_input_section(VBox info_holder){
-        String[] labels = new String[]{"Room:", "Name:", "Month:", "Payments:"};
         Button[] add_buttons = new Button[(labels.length)];
         int buttonNum = 0;
         for(String s: labels){
             Label l = new Label(s);
             TextField t = new TextField("");
+            t.setEditable(false);
             add_buttons[buttonNum] = new Button("+");
             
             HBox h = new HBox();
