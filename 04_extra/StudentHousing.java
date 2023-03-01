@@ -129,7 +129,8 @@ public class StudentHousing extends Application {
     private ArrayList<Button> create_room_buttons(GridPane room_grid, int noOfRooms){
         ArrayList<Button> roomButtons = new ArrayList<Button>(noOfRooms);
         int squareRoot = (int)Math.pow(noOfRooms, .5);
-        int remainder = noOfRooms % squareRoot;
+        int remainder = noOfRooms - (int)Math.pow(squareRoot,2);
+        System.out.println(remainder);
         int roomNum = 1;
         for(int i=0; i<squareRoot;i++){
             for(int j = 0; j < squareRoot;j++){
@@ -146,6 +147,7 @@ public class StudentHousing extends Application {
             roomNum++;
             room_i.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
             room_grid.add(room_i, i, squareRoot);
+            roomButtons.add(room_i);
         }
 
         return roomButtons;
