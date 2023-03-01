@@ -27,6 +27,7 @@ import javafx.scene.control.ListView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.util.ArrayList;
+import javafx.scene.layout.Pane;
 
 /**
 * 
@@ -70,64 +71,28 @@ public class StudentHousing extends Application {
         noOfRooms = getNumberOfRooms(); // call private method below for window
         // that takes in number of rooms in house 
         
-        // Gridpane
-        GridPane main_screen = new GridPane();
-
-        int squareRoot = (int)Math.pow(noOfRooms, .5);
-        int remainder = noOfRooms % squareRoot;
-        int roomNum = 1;
-        for(int i=0; i<squareRoot;i++){
-            for(int j = 0; j < squareRoot;j++){
-            //String room_num = Integer.toString(i+1);
-            Button room_i = new Button("" + roomNum);
-            roomNum++;
-            room_i.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
-            main_screen.add(room_i, j,i);
-            }
-        }
-        for(int i=0; i < remainder; i++){
-            Button room_i = new Button("" + roomNum);
-            roomNum++;
-            room_i.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
-            main_screen.add(room_i, i, squareRoot);
-        }
-
+        // create the buttons for the rooms
+        // and add them to the room_grid's children
+        GridPane room_grid = new GridPane();
+        ArrayList<Button> roomButtons = create_room_buttons(room_grid, noOfRooms);
         
-        // create some HBoxes
-        VBox display_box = new VBox(10);
-        String[] labels = new String[]{"Room:", "Name:", "Payments:"};
-        Button[] add_buttons = new Button[(labels.length)];
-        int buttonNum = 0;
-        for(String s: labels)
-        {
-            Label l = new Label(s);
-            TextField t = new TextField("");
-            add_buttons[buttonNum] = new Button("+");
-            
-            HBox h = new HBox();
-            h.getChildren().addAll(l, t, add_buttons[buttonNum]);
-            buttonNum++;
-            display_box.getChildren().add(h);
-        }
+        // create a VBox for housemate details textfields
+        // and add labels, textfields and buttons inside hboxes
+        // and store each button and userInputButtons
+        VBox info_holder = new VBox(10);
+        Button[] userInputButtons = create_user_input_section(info_holder);
+        create_payment_view(info_holder); // adds a ListView of payments to the info_holder
 
-        ArrayList<Payment> p = new ArrayList<Payment>();
-        ObservableList<Payment> observable_p = FXCollections.observableArrayList(p);
-        ListView<Payment> payment_view = new ListView<Payment>();
-        payment_view.setItems(observable_p);
-        display_box.getChildren().add(payment_view);
-        // create HBox
-        VBox grid = new VBox();
-        grid.getChildren().addAll(title, main_screen);
-        HBox root = new HBox(10);
-                
-       // set font of heading
-        Font font = new Font("Calibri", 20);
+
+        // create HBox for the title and the room_grid
+        VBox grid_holder = new VBox();
+        Font font = new Font("Calibri", 20); // set font of heading
         title.setFont(font);
-        
-        // add all components to VBox
-        root.getChildren().addAll(grid, display_box);
-        
-        
+        grid_holder.getChildren().addAll(title, room_grid);
+
+
+        HBox root = new HBox(10);
+        root.getChildren().addAll(grid_holder, info_holder);
         // create the scene
         Scene scene = new Scene(root, WIDTH, HEIGHT);
       
@@ -139,7 +104,76 @@ public class StudentHousing extends Application {
         stage.show(); 
         
     }
+
+/*************************************** FUNCTIONS WE WROTE ****************************************/
+
+    /**
+    * Method to create a listview of payments
+    * 
+    */
+    private void create_payment_view(VBox info_holder){
+        ArrayList<Payment> p = new ArrayList<Payment>();
+        ObservableList<Payment> observable_p = FXCollections.observableArrayList(p);
+        ListView<Payment> payment_view = new ListView<Payment>();
+        payment_view.setItems(observable_p);
+        info_holder.getChildren().add(payment_view);
+    }
     
+
+    /**
+    * Method to create a button for each room in the house
+    * @return array of room buttons
+    */
+    private ArrayList<Button> create_room_buttons(GridPane room_grid, int noOfRooms){
+        ArrayList<Button> roomButtons = new ArrayList<Button>(noOfRooms);
+        int squareRoot = (int)Math.pow(noOfRooms, .5);
+        int remainder = noOfRooms % squareRoot;
+        int roomNum = 1;
+        for(int i=0; i<squareRoot;i++){
+            for(int j = 0; j < squareRoot;j++){
+            //String room_num = Integer.toString(i+1);
+            Button room_i = new Button("" + roomNum);
+            roomNum++;
+            room_i.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
+            room_grid.add(room_i, j,i);
+            roomButtons.add(room_i);
+            }
+        }
+        for(int i=0; i < remainder; i++){
+            Button room_i = new Button("" + roomNum);
+            roomNum++;
+            room_i.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
+            room_grid.add(room_i, i, squareRoot);
+        }
+
+        return roomButtons;
+    }
+
+
+    /**
+    * Method to create text fields for user input
+    * @return array of buttons to add user input from corresponding textfields
+    */
+    private Button[] create_user_input_section(VBox info_holder){
+        String[] labels = new String[]{"Room:", "Name:", "Month:", "Payments:"};
+        Button[] add_buttons = new Button[(labels.length)];
+        int buttonNum = 0;
+        for(String s: labels){
+            Label l = new Label(s);
+            TextField t = new TextField("");
+            add_buttons[buttonNum] = new Button("+");
+            
+            HBox h = new HBox();
+            h.getChildren().addAll(l, t, add_buttons[buttonNum]);
+            buttonNum++;
+            info_holder.getChildren().add(h);
+        }
+
+        return add_buttons;
+    }
+
+/*************************************** FUNCTIONS GIVEN TO US ********************************************************/
+
     /**
     * Method to request number of house rooms from the user
     * @return number of rooms
