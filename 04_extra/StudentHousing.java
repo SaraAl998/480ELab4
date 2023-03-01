@@ -136,6 +136,7 @@ public class StudentHousing extends Application {
             for(int j = 0; j < squareRoot;j++){
             //String room_num = Integer.toString(i+1);
             Button room_i = new Button("" + roomNum);
+            room_i.setOnAction(e -> buttonPressed(room_i));
             roomNum++;
             room_i.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
             room_grid.add(room_i, j,i);
@@ -151,6 +152,11 @@ public class StudentHousing extends Application {
         }
 
         return roomButtons;
+    }
+
+    private void buttonPressed(Button button)
+    {
+        t.setEditable(true);
     }
 
 
