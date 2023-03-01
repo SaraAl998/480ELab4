@@ -169,6 +169,7 @@ public class StudentHousing extends Application {
             h.getChildren().addAll(l, t, add_buttons[buttonNum]);
             buttonNum++;
             info_holder.getChildren().add(h);
+            h.setAlignment(Pos.LEFT);
         }
 
         return add_buttons;
