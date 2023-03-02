@@ -34,6 +34,8 @@ import javafx.scene.control.TableView;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 /**
 * 
 * GUI for Off-campus Housing application
@@ -50,13 +52,13 @@ public class StudentHousing extends Application {
                                 // the info entered, modified and to display
     
     // WIDTH and HEIGHT of GUI stored as constants 
-    private final int WIDTH = 400;  // arbitrary number: change and update comments
-    private final int HEIGHT = 200;
+    private final int WIDTH = 500;  // arbitrary number: change and update comments
+    private final int HEIGHT = 400;
     
     // visual components to COMPLETE, starting code example
     // to have partial code handler working
     
-    private Label title = new Label("Housemates");
+    private Label title = new Label("Select a room: ");
     
     private Button saveAndQuitButton  = new Button("Save and Quit");
     private Button listButton  = new Button("A List"); 
@@ -83,38 +85,54 @@ public class StudentHousing extends Application {
         // create a VBox to display requested information
         // display a list of the housemates by default
         info_holder = new VBox(10);
-        create_housemate_view(info_holder); // adds a ListView of payments to the info_holder
+        create_housemate_view(info_holder); // adds a ListView of housemates to the info_holder
 
+        /*create a key explaining 
+        * what the colors of the room buttons mean*/
+        HBox key_holder = create_key();
 
-        // create the buttons for the rooms
-        // and add them to the room_grid's children
-        //GridPane room_grid = new GridPane();
-        //ArrayList<Button> roomButtons = create_room_buttons(room_grid, noOfRooms);
-        
+        /* 
+        * create a Pane for buttons for each room
+        * create the buttons for the rooms
+        * and add them to the room_grid's children
+        */
+        FlowPane room_grid = new FlowPane();
+        create_room_buttons(room_grid, noOfRooms);
+        recolor_room_buttons(); // recolors buttons based on information from the saved state (if any)
+        room_grid.setPrefWrapLength(150);
+
+        // load the image
+        Image image = new Image("house2.png");
+        // simple displays ImageView the image as is
+        ImageView iv1 = new ImageView();
+        iv1.setImage(image);
+
+        // Save current state of application before quiting
         Button saveAndQuitButton = new Button("Save and Quit");
         saveAndQuitButton.setOnAction(e -> saveAndQuitHandler());
 
-        // FLowPane version of room grid
-        FlowPane room_grid2 = new FlowPane();
-        create_room_buttons2(room_grid2, noOfRooms);
-        recolor_room_buttons();
-        room_grid2.setPrefWrapLength(150);
-
-        // create HBox for the title and the room_grid
+        // create HBox for the title, key, the room_grid, house.jpeg and saveAndQuitButton
         VBox grid_holder = new VBox();
         Font font = new Font("Calibri", 20); // set font of heading
         title.setFont(font);
-        grid_holder.getChildren().addAll(title, room_grid2, saveAndQuitButton);
-
+        grid_holder.getChildren().addAll(title, key_holder, room_grid, iv1, saveAndQuitButton);
+        saveAndQuitButton.setAlignment(Pos.BOTTOM_LEFT);
+        iv1.setFitHeight(50);
+        iv1.setFitWidth(50);
 
         HBox root = new HBox(10);
+        root.setSpacing(10);
+        root.setPadding(new Insets(5, 15, 5, 1)); 
+        root.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, new CornerRadii(0), new Insets(0))));
         root.getChildren().addAll(grid_holder, info_holder);
+        grid_holder.setMinHeight(root.getHeight()*0.8);
+        grid_holder.setMinWidth(root.getWidth()*0.8);
         // create the scene
         Scene scene = new Scene(root, WIDTH, HEIGHT);
       
         // call private methods for button event handlers
         // you will need one for each button added: call and complete all the ones provided
-        
+        stage.setResizable(false);
         stage.setScene(scene);
         stage.setTitle("Off-campus Houseing Application");
         stage.show(); 
@@ -123,7 +141,24 @@ public class StudentHousing extends Application {
 
 /*************************************** NEW FUNCTIONS ADDED ****************************************/
 
-/**
+    /*
+    * Method to recolor buttons based on occupancy
+    * @return void
+    */
+    private HBox create_key(){
+        Label l1 = new Label("Occupied");
+        l1.setBackground(new Background(new BackgroundFill(Color.RED, new CornerRadii(0), new Insets(1))));
+
+        Label l2 = new Label("Unoccupied");
+        l2.setBackground(new Background(new BackgroundFill(Color.YELLOWGREEN, new CornerRadii(0), new Insets(1))));
+
+        HBox key_holder = new HBox();
+        key_holder.getChildren().addAll(l1, l2);
+
+        return key_holder;
+    }
+
+    /*
     * Method to recolor buttons based on occupancy
     * @return void
     */
@@ -137,14 +172,13 @@ public class StudentHousing extends Application {
             
             roomNum++;
         }
-
     }
 
     /**
     * Method to create a button for each room in the house
     * @return array of room buttons
     */
-    private void create_room_buttons2(FlowPane room_grid, int noOfRooms){
+    private void create_room_buttons(FlowPane room_grid, int noOfRooms){
         roomNum = 1;
         for(int i=0; i<noOfRooms;i++){
             Button room_i = new Button("" + roomNum);
@@ -192,46 +226,6 @@ public class StudentHousing extends Application {
         amountCol.setCellValueFactory(new PropertyValueFactory("amount"));
         paymentTable.getColumns().setAll(monthCol, amountCol);
         info_holder.getChildren().add(paymentTable);
-    }
-    
-
-    /**
-    * Method to create a button for each room in the house
-    * @return array of room buttons
-    */
-    /*private ArrayList<Button> create_room_buttons(GridPane room_grid, int noOfRooms){
-        ArrayList<Button> roomButtons = new ArrayList<Button>(noOfRooms);
-        int squareRoot = (int)Math.pow(noOfRooms, .5);
-        int remainder = noOfRooms - (int)Math.pow(squareRoot,2);
-        //System.out.println(remainder);
-        roomNum = 1;
-        for(int i=0; i<squareRoot;i++){
-            for(int j = 0; j < squareRoot;j++){
-            //String room_num = Integer.toString(i+1);
-            Button room_i = new Button("" + roomNum);
-            room_i.setOnAction(e ->populateRoomInfo(Integer.parseInt(room_i.getText())));
-            roomNum++;
-            room_i.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
-            room_grid.add(room_i, j,i);
-            roomButtons.add(room_i);
-            }
-        }
-        for(int i=0; i < remainder; i++){
-            Button room_i = new Button("" + roomNum);
-            room_i.setOnAction(e ->populateRoomInfo(Integer.parseInt(room_i.getText()), ));
-            roomNum++;
-            room_i.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
-            room_grid.add(room_i, i, squareRoot);
-            roomButtons.add(room_i);
-        }
-        //roomNum=1;
-
-        return roomButtons;
-    }*/
-
-    private void buttonPressed(Button button, TextField t)
-    {
-        t.setEditable(true);
     }
 
     private void populateRoomInfo(int roomNum){
