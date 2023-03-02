@@ -17,6 +17,7 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -36,6 +37,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+
 import javafx.scene.layout.BorderPane;
 /**
 * 
@@ -68,11 +72,13 @@ public class StudentHousing extends Application {
     private TextArea displayArea2;
     
 /**************** NEW FINAL VARIABLES ADDED ********************************/
-    private String[] labels = new String[]{"Room:", "Name:", "Month:", "Payments:"};
+    private String[] labels = new String[]{"Room:    ", "Name:    ", "Month:   ", "Payments:"};
     private int roomNum = 0;
     //private int[] roomNums = new int[]{}
     private VBox info_holder;
     private ArrayList<Button> roomButtonList = new ArrayList<Button>();
+    private ComboBox combo_box = new ComboBox();
+    String curr_month = "";
 /*************** START METHOD **********************************************/
     @Override
     /** Initialises the screen 
@@ -164,6 +170,25 @@ public class StudentHousing extends Application {
     }
 
 /*************************************** NEW FUNCTIONS ADDED ****************************************/
+    /*
+    * Method to create the menu of months
+    * @return a ComboBox object 
+    */
+    private ComboBox create_month_menu(){
+         String[] months =
+         { "January", "February", "March", "April", "May", "June", 
+         "July", "August", "September", "October", "November", "December"};
+
+    // Create a combo box
+    ComboBox combo_box = new ComboBox(FXCollections.observableArrayList(months));
+    combo_box.valueProperty().addListener(new ChangeListener<String>() {
+        @Override public void changed(ObservableValue ov, String t, String t1) {
+            curr_month=t1;
+        }    
+    });
+    return combo_box;
+    }
+
 
     /*
     * Method to recolor buttons based on occupancy
@@ -317,10 +342,11 @@ public class StudentHousing extends Application {
     }
 
     private void makePayment(int roomNum, ArrayList<TextField> textfields){
-        if ((textfields.get(2).getText() != "") && textfields.get(3).getText() != ""){
+        if ((textfields.get(2).getText() != "") && !curr_month.equals("")){
             //makePaymentButton.setDisable(false);
-            String month = textfields.get(2).getText();
-            double amount = Double.parseDouble(textfields.get(3).getText());
+            String month = curr_month;
+            curr_month="";
+            double amount = Double.parseDouble(textfields.get(2).getText());
             if (amount>0){
                 Payment p = new Payment(month, amount);
                 Housemate h = list.search(roomNum);
@@ -341,17 +367,17 @@ public class StudentHousing extends Application {
         for(String s: labels){
             Label l = new Label(s);
             TextField t = new TextField("");
-            if (s.equals("Room:")){t.setEditable(false); t.setText(""+ roomNum);}
-            if (s.equals("Name:")){
+            if (s.equals("Room:    ")){t.setEditable(false); t.setText(""+ roomNum);}
+            if (s.equals("Name:    ")){
                 if (list.search(roomNum)==null){t.setText("Unoccupied Room");}
                 else{t.setText(list.search(roomNum).getName());t.setEditable(false);}
             } 
-            //if (s.equal("Month:")){}
-        
-            textfields.add(t);
+            if (!(s.equals("Month:   "))){textfields.add(t);}
+            else{combo_box = create_month_menu();}
 
             HBox h = new HBox();
-            h.getChildren().addAll(l, t);
+            if (!s.equals("Month:   ")){h.getChildren().addAll(l, t);}
+            else{h.getChildren().addAll(l, combo_box);}
             buttonNum++;
             info_holder.getChildren().add(h);
             h.setAlignment(Pos.TOP_LEFT);
