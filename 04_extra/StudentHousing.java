@@ -131,7 +131,7 @@ public class StudentHousing extends Application {
         roomNum = 1;
         for(int i=0; i<noOfRooms;i++){
             Button room_i = roomButtonList.get(i);
-            if (list.getHousemate(roomNum) != null){
+            if (list.search(roomNum) != null){
             room_i.setBackground(new Background(new BackgroundFill(Color.RED, new CornerRadii(10), Insets.EMPTY)));
             }
             
@@ -239,7 +239,7 @@ public class StudentHousing extends Application {
         int roomNumCopy = roomNum;
         ArrayList<TextField> textfields = create_user_input_section(roomNumCopy);
         Button[] nav_buttons = create_room_nav_buttons(roomNum, textfields);
-        if (list.getHousemate(roomNum)!=null){create_payment_view(list.getHousemate(roomNum));}
+        if (list.search(roomNum)!=null){create_payment_view(list.search(roomNum));}
     }
 
     private Button[] create_room_nav_buttons(int roomNum, ArrayList<TextField> textfields){
@@ -324,8 +324,8 @@ public class StudentHousing extends Application {
             TextField t = new TextField("");
             if (s.equals("Room:")){t.setEditable(false); t.setText(""+ roomNum);}
             if (s.equals("Name:")){
-                if (list.getHousemate(roomNum)==null){t.setText("Unoccupied Room");}
-                else{t.setText(list.getHousemate(roomNum).getName());t.setEditable(false);}
+                if (list.search(roomNum)==null){t.setText("Unoccupied Room");}
+                else{t.setText(list.search(roomNum).getName());t.setEditable(false);}
             } 
             //if (s.equal("Month:")){}
         
