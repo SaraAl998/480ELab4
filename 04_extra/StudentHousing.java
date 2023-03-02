@@ -72,7 +72,7 @@ public class StudentHousing extends Application {
     private TextArea displayArea2;
     
 /**************** NEW FINAL VARIABLES ADDED ********************************/
-    private String[] labels = new String[]{"Room:    ", "Name:    ", "Month:   ", "Payments:"};
+    private String[] labels = new String[]{"Room:    ", "Name:    ", "Month:   ", "Amount: "};
     private int roomNum = 0;
     //private int[] roomNums = new int[]{}
     private VBox info_holder;
@@ -164,7 +164,7 @@ public class StudentHousing extends Application {
         // you will need one for each button added: call and complete all the ones provided
         stage.setResizable(false);
         stage.setScene(scene);
-        stage.setTitle("Off-campus Houseing Application");
+        stage.setTitle("Off-campus Housing Application");
         stage.show(); 
         
     }
