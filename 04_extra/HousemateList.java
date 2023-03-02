@@ -4,7 +4,7 @@ import java.util.ArrayList;
  */
 
 public class HousemateList  {
-    private ArrayList<Housemate> tList;
+    private static ArrayList<Housemate> tList;
     public final int MAX;
         
     /** Constructor initialises the empty housemate list and sets the maximum list size 
@@ -96,6 +96,10 @@ public class HousemateList  {
     @Override
     public String toString() {
         return tList.toString();
+    }
+
+    public static ArrayList<Housemate> getHousemateList(){
+        return tList;
     }
 }
 

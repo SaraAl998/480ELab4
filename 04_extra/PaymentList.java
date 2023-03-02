@@ -5,7 +5,7 @@ import java.util.ArrayList;
  */
 public class PaymentList  {
    // attributes
-   private ArrayList<Payment> pList;
+   private static ArrayList<Payment> pList;
    public final int MAX;
         
    /** Constructor initialises the empty payment list and sets the maximum list size 
@@ -74,6 +74,10 @@ public class PaymentList  {
       }
       return totalPaid;
 	}
+
+   public static ArrayList<Payment> getPaymentList(){
+      return pList;
+   }
                    
    @Override
 	public String toString() {

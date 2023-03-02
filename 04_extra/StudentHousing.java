@@ -29,7 +29,10 @@ import javafx.collections.ObservableList;
 import java.util.ArrayList;
 import javafx.scene.layout.Pane;
 import javafx.geometry.Pos;
-
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.control.cell.PropertyValueFactory;
 /**
 * 
 * GUI for Off-campus Housing application
@@ -73,27 +76,26 @@ public class StudentHousing extends Application {
     public void start(Stage stage) {
         noOfRooms = getNumberOfRooms(); // call private method below for window
         // that takes in number of rooms in house 
-        list = new HousemateList(noOfRooms);
+        initFromFile();
 
-        // create a VBox for housemate details textfields
-        // and add labels, textfields and buttons inside hboxes
-        // and store each button and userInputButtons
+        // create a VBox to display requested information
+        // display a list of the housemates by default
         info_holder = new VBox(10);
-        //Button[] userInputButtons = create_user_input_section(info_holder);
-        //create_payment_view(info_holder); // adds a ListView of payments to the info_holder
+        create_housemate_view(info_holder); // adds a ListView of payments to the info_holder
 
 
         // create the buttons for the rooms
         // and add them to the room_grid's children
         GridPane room_grid = new GridPane();
         ArrayList<Button> roomButtons = create_room_buttons(room_grid, noOfRooms, info_holder);
-
+        Button saveAndQuitButton = new Button("Save and Quit");
+        saveAndQuitButton.setOnAction(e -> saveAndQuitHandler());
 
         // create HBox for the title and the room_grid
         VBox grid_holder = new VBox();
         Font font = new Font("Calibri", 20); // set font of heading
         title.setFont(font);
-        grid_holder.getChildren().addAll(title, room_grid);
+        grid_holder.getChildren().addAll(title, room_grid, saveAndQuitButton);
 
 
         HBox root = new HBox(10);
@@ -113,15 +115,40 @@ public class StudentHousing extends Application {
 /*************************************** NEW FUNCTIONS ADDED ****************************************/
 
     /**
+    * Method to create a listview of all the housemates
+    * 
+    */
+    private void create_housemate_view(VBox info_holder){
+        ArrayList<Housemate> h = HousemateList.getHousemateList();
+        ObservableList<Housemate> observable_housemateList = FXCollections.observableArrayList(h);
+        ListView<Housemate> housemate_view = new ListView<Housemate>();
+        housemate_view.setItems(observable_housemateList);
+        TableView<Housemate> table = new TableView<Housemate>();
+        table.setItems(observable_housemateList);
+        TableColumn<Housemate, Integer> roomNumCol = new TableColumn<Housemate, Integer>("Room Number");
+        roomNumCol.setCellValueFactory(new PropertyValueFactory("room"));
+        TableColumn<Housemate, String> nameCol = new TableColumn<Housemate, String>("Name");
+        nameCol.setCellValueFactory(new PropertyValueFactory("name"));
+        table.getColumns().setAll(roomNumCol, nameCol);
+        info_holder.getChildren().add(table);
+    }
+
+    /**
     * Method to create a listview of payments
     * 
     */
-    private void create_payment_view(VBox info_holder){
-        ArrayList<Payment> p = new ArrayList<Payment>();
+    private void create_payment_view(Housemate h){
+        ArrayList<Payment> p = h.getPayments().getPaymentList();
+        //System.out.println(p);
         ObservableList<Payment> observable_p = FXCollections.observableArrayList(p);
-        ListView<Payment> payment_view = new ListView<Payment>();
-        payment_view.setItems(observable_p);
-        info_holder.getChildren().add(payment_view);
+        TableView<Payment> paymentTable = new TableView<Payment>();
+        paymentTable.setItems(observable_p);
+        TableColumn<Payment, String> monthCol = new TableColumn<Payment, String>("Month");
+        monthCol.setCellValueFactory(new PropertyValueFactory("month"));
+        TableColumn<Payment, Integer> amountCol = new TableColumn<Payment, Integer>("Amount");
+        amountCol.setCellValueFactory(new PropertyValueFactory("amount"));
+        paymentTable.getColumns().setAll(monthCol, amountCol);
+        info_holder.getChildren().add(paymentTable);
     }
     
 
@@ -139,7 +166,7 @@ public class StudentHousing extends Application {
             for(int j = 0; j < squareRoot;j++){
             //String room_num = Integer.toString(i+1);
             Button room_i = new Button("" + roomNum);
-            room_i.setOnAction(e ->populateInfoHolder(Integer.parseInt(room_i.getText())));
+            room_i.setOnAction(e ->populateRoomInfo(Integer.parseInt(room_i.getText())));
             roomNum++;
             room_i.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
             room_grid.add(room_i, j,i);
@@ -148,7 +175,7 @@ public class StudentHousing extends Application {
         }
         for(int i=0; i < remainder; i++){
             Button room_i = new Button("" + roomNum);
-            room_i.setOnAction(e ->populateInfoHolder(Integer.parseInt(room_i.getText())));
+            room_i.setOnAction(e ->populateRoomInfo(Integer.parseInt(room_i.getText())));
             roomNum++;
             room_i.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
             room_grid.add(room_i, i, squareRoot);
@@ -164,15 +191,16 @@ public class StudentHousing extends Application {
         t.setEditable(true);
     }
 
-    private void populateInfoHolder(int roomNum){
+    private void populateRoomInfo(int roomNum){
+        info_holder.getChildren().clear();
         int roomNumCopy = roomNum;
         ArrayList<TextField> textfields = create_user_input_section(roomNumCopy);
-        Button[] nav_buttons = create_nav_buttons(roomNum, textfields);
-        create_payment_view(info_holder);
+        Button[] nav_buttons = create_room_nav_buttons(roomNum, textfields);
+        if (list.getHousemate(roomNum)!=null){create_payment_view(list.getHousemate(roomNum));}
     }
 
-    private Button[] create_nav_buttons(int roomNum, ArrayList<TextField> textfields){
-        Button[] nav_buttons = new Button[2];
+    private Button[] create_room_nav_buttons(int roomNum, ArrayList<TextField> textfields){
+        Button[] nav_buttons = new Button[3];
         HBox nav_button_holder = new HBox();
 
         Button updateButton = new Button("Update");
@@ -184,6 +212,19 @@ public class StudentHousing extends Application {
         nav_buttons[1]= exitRoomButton;
 
         nav_button_holder.getChildren().addAll(updateButton, exitRoomButton);
+
+        if (list.getHousemate(roomNum)!=null){
+            Button removeHousemateButton = new Button("Remove Housemate");
+            removeHousemateButton.setOnAction(e -> removeHousemate(roomNum));
+            nav_button_holder.getChildren().add(removeHousemateButton);
+
+            Button makePaymentButton = new Button("Make Payment");
+            String month = "";
+            double amount = 0;
+            makePaymentButton.setOnAction(e -> makePayment(roomNum, textfields));
+            nav_button_holder.getChildren().add(makePaymentButton);
+        }
+
         info_holder.getChildren().add(nav_button_holder);
         return nav_buttons;
 
@@ -194,13 +235,33 @@ public class StudentHousing extends Application {
         if (!name.isEmpty()){
             Housemate newHousemate = new Housemate(name, roomNum);
             list.addHousemate(newHousemate);
-            System.out.println("Added a housemate!");
         }
+        populateRoomInfo(roomNum);
     }
 
     private void exit_room(){
         //info_holder = new VBox();
         info_holder.getChildren().clear();
+        create_housemate_view(info_holder);
+    }
+
+    private void removeHousemate(int roomNum){
+        list.removeHousemate(roomNum);
+        populateRoomInfo(roomNum);
+    }
+
+    private void makePayment(int roomNum, ArrayList<TextField> textfields){
+        if ((textfields.get(2).getText() != "") && textfields.get(3).getText() != ""){
+            //makePaymentButton.setDisable(false);
+            String month = textfields.get(2).getText();
+            double amount = Double.parseDouble(textfields.get(3).getText());
+            if (amount>0){
+                Payment p = new Payment(month, amount);
+                Housemate h = list.getHousemate(roomNum);
+                h.makePayment(p);
+                populateRoomInfo(roomNum);
+            }
+        }
     }
 
 
@@ -215,6 +276,12 @@ public class StudentHousing extends Application {
             Label l = new Label(s);
             TextField t = new TextField("");
             if (s.equals("Room:")){t.setEditable(false); t.setText(""+ roomNum);}
+            if (s.equals("Name:")){
+                if (list.getHousemate(roomNum)==null){t.setText("Unoccupied Room");}
+                else{t.setText(list.getHousemate(roomNum).getName());t.setEditable(false);}
+            } 
+            //if (s.equal("Month:")){}
+        
             textfields.add(t);
 
             HBox h = new HBox();
