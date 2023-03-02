@@ -37,9 +37,13 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+<<<<<<< HEAD
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
+=======
+import javafx.scene.layout.BorderPane;
+>>>>>>> ba47f4660748782257131079b546f1eab24e19cf
 /**
 * 
 * GUI for Off-campus Housing application
@@ -86,10 +90,16 @@ public class StudentHousing extends Application {
     public void start(Stage stage) {
         noOfRooms = getNumberOfRooms(); // call private method below for window
         // that takes in number of rooms in house 
-        initFromFile();
-        if (list.getHousemateList().size() > noOfRooms){
-            noOfRooms = list.getHousemateList().size();
+        initFromFile(100);
+        int max = 1;
+        for(Housemate h: list.getHousemateList())
+        {
+            if(h.getRoom() > max) {max = h.getRoom();}
         }
+        if (max > noOfRooms){
+            noOfRooms = max;
+        }
+        initFromFile(noOfRooms);
         // create a VBox to display requested information
         // display a list of the housemates by default
         info_holder = new VBox(10);
@@ -107,29 +117,47 @@ public class StudentHousing extends Application {
         FlowPane room_grid = new FlowPane();
         create_room_buttons(room_grid, noOfRooms);
         recolor_room_buttons(); // recolors buttons based on information from the saved state (if any)
-        room_grid.setPrefWrapLength(150);
+        room_grid.setPrefWrapLength(210);
 
         // load the image
         Image image = new Image("house2.png");
         // simple displays ImageView the image as is
         ImageView iv1 = new ImageView();
         iv1.setImage(image);
+        iv1.setFitHeight(100);
+        iv1.setFitWidth(100);
+        BorderPane imgPane = new BorderPane();
+        imgPane.setPrefSize(100,100);
+        imgPane.setCenter(iv1);
 
         // Save current state of application before quiting
         Button saveAndQuitButton = new Button("Save and Quit");
         saveAndQuitButton.setOnAction(e -> saveAndQuitHandler());
+        BorderPane saveAndQuitButtonPane = new BorderPane();
+        saveAndQuitButtonPane.setPrefSize(100,50);
+        saveAndQuitButtonPane.setCenter(saveAndQuitButton);
 
         // create HBox for the title, key, the room_grid, house.jpeg and saveAndQuitButton
         VBox grid_holder = new VBox();
+        
         Font font = new Font("Calibri", 20); // set font of heading
         title.setFont(font);
+<<<<<<< HEAD
         grid_holder.getChildren().addAll(title, key_holder, room_grid, iv1, saveAndQuitButton);
         iv1.setFitHeight(50);
         iv1.setFitWidth(50);
+=======
+        grid_holder.setSpacing(15);
+
+        
+        grid_holder.getChildren().addAll(title, key_holder, room_grid, imgPane, saveAndQuitButtonPane);
+        saveAndQuitButton.setAlignment(Pos.CENTER_RIGHT);
+        
+>>>>>>> ba47f4660748782257131079b546f1eab24e19cf
 
         HBox root = new HBox(10);
         root.setSpacing(10);
-        root.setPadding(new Insets(5, 15, 5, 1)); 
+        root.setPadding(new Insets(5, 15, 5, 15)); 
         root.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, new CornerRadii(0), new Insets(0))));
         root.getChildren().addAll(grid_holder, info_holder);
         grid_holder.setMinHeight(root.getHeight()*0.8);
@@ -209,7 +237,7 @@ public class StudentHousing extends Application {
         roomNum = 1;
         for(int i=0; i<noOfRooms;i++){
             Button room_i = new Button("" + roomNum);
-            room_i.setPrefSize(30,30);
+            room_i.setPrefSize(Math.max(400/noOfRooms, 30),Math.max(400/noOfRooms, 30));
             room_i.setOnAction(e ->populateRoomInfo(Integer.parseInt(room_i.getText())));
             roomNum++;
             room_i.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
@@ -383,8 +411,8 @@ public class StudentHousing extends Application {
     * Need to be called at the beginning of application to implement
     * save to file feature
     */
-    private void initFromFile() {
-        list  = new HousemateList(noOfRooms);   
+    private void initFromFile(int capacity) {
+        list  = new HousemateList(capacity);   
         HousemateFileHandler.readRecords(list);
     }
     
