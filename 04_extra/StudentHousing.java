@@ -52,7 +52,7 @@ public class StudentHousing extends Application {
                                 // the info entered, modified and to display
     
     // WIDTH and HEIGHT of GUI stored as constants 
-    private final int WIDTH = 500;  // arbitrary number: change and update comments
+    private final int WIDTH = 600;  // arbitrary number: change and update comments
     private final int HEIGHT = 400;
     
     // visual components to COMPLETE, starting code example
@@ -68,7 +68,7 @@ public class StudentHousing extends Application {
     
 /**************** NEW FINAL VARIABLES ADDED ********************************/
     private String[] labels = new String[]{"Room:", "Name:", "Month:", "Payments:"};
-    private int roomNum;
+    private int roomNum = 0;
     //private int[] roomNums = new int[]{}
     private VBox info_holder;
     private ArrayList<Button> roomButtonList = new ArrayList<Button>();
@@ -81,7 +81,9 @@ public class StudentHousing extends Application {
         noOfRooms = getNumberOfRooms(); // call private method below for window
         // that takes in number of rooms in house 
         initFromFile();
-
+        if (list.getHousemateList().size() > noOfRooms){
+            noOfRooms = list.getHousemateList().size();
+        }
         // create a VBox to display requested information
         // display a list of the housemates by default
         info_holder = new VBox(10);
@@ -172,6 +174,7 @@ public class StudentHousing extends Application {
             
             roomNum++;
         }
+        roomNum=0;
     }
 
     /**
@@ -189,7 +192,7 @@ public class StudentHousing extends Application {
             room_grid.getChildren().add(room_i);
             roomButtonList.add(room_i);
         }
-
+        roomNum=0;
     }
     /**
     * Method to create a listview of all the housemates
