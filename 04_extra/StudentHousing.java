@@ -80,10 +80,16 @@ public class StudentHousing extends Application {
     public void start(Stage stage) {
         noOfRooms = getNumberOfRooms(); // call private method below for window
         // that takes in number of rooms in house 
-        initFromFile();
-        if (list.getHousemateList().size() > noOfRooms){
-            noOfRooms = list.getHousemateList().size();
+        initFromFile(100);
+        int max = 1;
+        for(Housemate h: list.getHousemateList())
+        {
+            if(h.getRoom() > max) {max = h.getRoom();}
         }
+        if (max > noOfRooms){
+            noOfRooms = max;
+        }
+        initFromFile(noOfRooms);
         // create a VBox to display requested information
         // display a list of the housemates by default
         info_holder = new VBox(10);
@@ -358,8 +364,8 @@ public class StudentHousing extends Application {
     * Need to be called at the beginning of application to implement
     * save to file feature
     */
-    private void initFromFile() {
-        list  = new HousemateList(noOfRooms);   
+    private void initFromFile(int capacity) {
+        list  = new HousemateList(capacity);   
         HousemateFileHandler.readRecords(list);
     }
     
