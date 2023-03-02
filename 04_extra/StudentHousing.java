@@ -37,13 +37,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-<<<<<<< HEAD
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
-=======
 import javafx.scene.layout.BorderPane;
->>>>>>> ba47f4660748782257131079b546f1eab24e19cf
 /**
 * 
 * GUI for Off-campus Housing application
@@ -142,18 +139,12 @@ public class StudentHousing extends Application {
         
         Font font = new Font("Calibri", 20); // set font of heading
         title.setFont(font);
-<<<<<<< HEAD
-        grid_holder.getChildren().addAll(title, key_holder, room_grid, iv1, saveAndQuitButton);
-        iv1.setFitHeight(50);
-        iv1.setFitWidth(50);
-=======
         grid_holder.setSpacing(15);
 
         
         grid_holder.getChildren().addAll(title, key_holder, room_grid, imgPane, saveAndQuitButtonPane);
         saveAndQuitButton.setAlignment(Pos.CENTER_RIGHT);
         
->>>>>>> ba47f4660748782257131079b546f1eab24e19cf
 
         HBox root = new HBox(10);
         root.setSpacing(10);
