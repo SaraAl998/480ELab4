@@ -33,6 +33,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.FlowPane;
 /**
 * 
 * GUI for Off-campus Housing application
@@ -68,6 +69,7 @@ public class StudentHousing extends Application {
     private int roomNum;
     //private int[] roomNums = new int[]{}
     private VBox info_holder;
+    private ArrayList<Button> roomButtonList = new ArrayList<Button>();
 /*************** START METHOD **********************************************/
     @Override
     /** Initialises the screen 
@@ -86,16 +88,23 @@ public class StudentHousing extends Application {
 
         // create the buttons for the rooms
         // and add them to the room_grid's children
-        GridPane room_grid = new GridPane();
-        ArrayList<Button> roomButtons = create_room_buttons(room_grid, noOfRooms, info_holder);
+        //GridPane room_grid = new GridPane();
+        //ArrayList<Button> roomButtons = create_room_buttons(room_grid, noOfRooms);
+        
         Button saveAndQuitButton = new Button("Save and Quit");
         saveAndQuitButton.setOnAction(e -> saveAndQuitHandler());
+
+        // FLowPane version of room grid
+        FlowPane room_grid2 = new FlowPane();
+        create_room_buttons2(room_grid2, noOfRooms);
+        recolor_room_buttons();
+        room_grid2.setPrefWrapLength(150);
 
         // create HBox for the title and the room_grid
         VBox grid_holder = new VBox();
         Font font = new Font("Calibri", 20); // set font of heading
         title.setFont(font);
-        grid_holder.getChildren().addAll(title, room_grid, saveAndQuitButton);
+        grid_holder.getChildren().addAll(title, room_grid2, saveAndQuitButton);
 
 
         HBox root = new HBox(10);
@@ -114,6 +123,40 @@ public class StudentHousing extends Application {
 
 /*************************************** NEW FUNCTIONS ADDED ****************************************/
 
+/**
+    * Method to recolor buttons based on occupancy
+    * @return void
+    */
+    private void recolor_room_buttons(){
+        roomNum = 1;
+        for(int i=0; i<noOfRooms;i++){
+            Button room_i = roomButtonList.get(i);
+            if (list.getHousemate(roomNum) != null){
+            room_i.setBackground(new Background(new BackgroundFill(Color.RED, new CornerRadii(10), Insets.EMPTY)));
+            }
+            
+            roomNum++;
+        }
+
+    }
+
+    /**
+    * Method to create a button for each room in the house
+    * @return array of room buttons
+    */
+    private void create_room_buttons2(FlowPane room_grid, int noOfRooms){
+        roomNum = 1;
+        for(int i=0; i<noOfRooms;i++){
+            Button room_i = new Button("" + roomNum);
+            room_i.setPrefSize(30,30);
+            room_i.setOnAction(e ->populateRoomInfo(Integer.parseInt(room_i.getText())));
+            roomNum++;
+            room_i.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
+            room_grid.getChildren().add(room_i);
+            roomButtonList.add(room_i);
+        }
+
+    }
     /**
     * Method to create a listview of all the housemates
     * 
@@ -156,7 +199,7 @@ public class StudentHousing extends Application {
     * Method to create a button for each room in the house
     * @return array of room buttons
     */
-    private ArrayList<Button> create_room_buttons(GridPane room_grid, int noOfRooms, VBox info_holder){
+    /*private ArrayList<Button> create_room_buttons(GridPane room_grid, int noOfRooms){
         ArrayList<Button> roomButtons = new ArrayList<Button>(noOfRooms);
         int squareRoot = (int)Math.pow(noOfRooms, .5);
         int remainder = noOfRooms - (int)Math.pow(squareRoot,2);
@@ -175,7 +218,7 @@ public class StudentHousing extends Application {
         }
         for(int i=0; i < remainder; i++){
             Button room_i = new Button("" + roomNum);
-            room_i.setOnAction(e ->populateRoomInfo(Integer.parseInt(room_i.getText())));
+            room_i.setOnAction(e ->populateRoomInfo(Integer.parseInt(room_i.getText()), ));
             roomNum++;
             room_i.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
             room_grid.add(room_i, i, squareRoot);
@@ -184,7 +227,7 @@ public class StudentHousing extends Application {
         //roomNum=1;
 
         return roomButtons;
-    }
+    }*/
 
     private void buttonPressed(Button button, TextField t)
     {
@@ -235,6 +278,8 @@ public class StudentHousing extends Application {
         if (!name.isEmpty()){
             Housemate newHousemate = new Housemate(name, roomNum);
             list.addHousemate(newHousemate);
+            Button room_button = roomButtonList.get(roomNum-1);
+            room_button.setBackground(new Background(new BackgroundFill(Color.RED, new CornerRadii(10), Insets.EMPTY)));
         }
         populateRoomInfo(roomNum);
     }
@@ -248,6 +293,8 @@ public class StudentHousing extends Application {
     private void removeHousemate(int roomNum){
         list.removeHousemate(roomNum);
         populateRoomInfo(roomNum);
+        Button roomButton = roomButtonList.get(roomNum-1);
+        roomButton.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
     }
 
     private void makePayment(int roomNum, ArrayList<TextField> textfields){
