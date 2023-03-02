@@ -86,6 +86,10 @@ public class StudentHousing extends Application {
     */
     public void start(Stage stage) {
         noOfRooms = getNumberOfRooms(); // call private method below for window
+        if(noOfRooms > 35)
+        {
+            noOfRooms = 35;
+        }
         // that takes in number of rooms in house 
         initFromFile(100);
         int max = 1;
@@ -142,7 +146,7 @@ public class StudentHousing extends Application {
         grid_holder.setSpacing(15);
 
         
-        grid_holder.getChildren().addAll(title, key_holder, room_grid, imgPane, saveAndQuitButtonPane);
+        grid_holder.getChildren().addAll(title, imgPane, key_holder, room_grid, saveAndQuitButtonPane);
         saveAndQuitButton.setAlignment(Pos.CENTER_RIGHT);
         
 
@@ -160,7 +164,7 @@ public class StudentHousing extends Application {
         // you will need one for each button added: call and complete all the ones provided
         stage.setResizable(false);
         stage.setScene(scene);
-        stage.setTitle("Off-campus Houseing Application");
+        stage.setTitle("Off-campus Housing Application");
         stage.show(); 
         
     }
