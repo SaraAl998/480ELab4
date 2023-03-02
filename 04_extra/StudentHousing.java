@@ -124,17 +124,20 @@ public class StudentHousing extends Application {
         // Save current state of application before quiting
         Button saveAndQuitButton = new Button("Save and Quit");
         saveAndQuitButton.setOnAction(e -> saveAndQuitHandler());
+        BorderPane saveAndQuitButtonPane = new BorderPane();
+        saveAndQuitButtonPane.setPrefSize(100,50);
+        saveAndQuitButtonPane.setCenter(saveAndQuitButton);
 
         // create HBox for the title, key, the room_grid, house.jpeg and saveAndQuitButton
         VBox grid_holder = new VBox();
-        grid_holder.prefWidthProperty().bind(room_grid.prefWidthProperty());
-        grid_holder.prefHeightProperty().bind(room_grid.prefHeightProperty());
+        
         Font font = new Font("Calibri", 20); // set font of heading
         title.setFont(font);
+        grid_holder.setSpacing(15);
 
         
-        grid_holder.getChildren().addAll(title, key_holder, room_grid, imgPane, saveAndQuitButton);
-        saveAndQuitButton.setAlignment(Pos.CENTER);
+        grid_holder.getChildren().addAll(title, key_holder, room_grid, imgPane, saveAndQuitButtonPane);
+        saveAndQuitButton.setAlignment(Pos.CENTER_RIGHT);
         
 
         HBox root = new HBox(10);
