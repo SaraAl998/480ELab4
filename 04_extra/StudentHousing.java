@@ -72,7 +72,7 @@ public class StudentHousing extends Application {
     private TextArea displayArea2;
     
 /**************** NEW FINAL VARIABLES ADDED ********************************/
-    private String[] labels = new String[]{"Room:    ", "Name:    ", "Month:   ", "Payments:"};
+    private String[] labels = new String[]{"Name:    ", "Month:   ", "Payments:"};
     private int roomNum = 0;
     //private int[] roomNums = new int[]{}
     private VBox info_holder;
@@ -363,7 +363,6 @@ public class StudentHousing extends Application {
         for(String s: labels){
             Label l = new Label(s);
             TextField t = new TextField("");
-            if (s.equals("Room:    ")){t.setEditable(false); t.setText(""+ roomNum);}
             if (s.equals("Name:    ")){
                 if (list.search(roomNum)==null){t.setText("Unoccupied Room");}
                 else{t.setText(list.search(roomNum).getName());t.setEditable(false);}
