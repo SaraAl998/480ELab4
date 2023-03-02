@@ -36,6 +36,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 /**
 * 
 * GUI for Off-campus Housing application
@@ -107,13 +108,18 @@ public class StudentHousing extends Application {
         FlowPane room_grid = new FlowPane();
         create_room_buttons(room_grid, noOfRooms);
         recolor_room_buttons(); // recolors buttons based on information from the saved state (if any)
-        room_grid.setPrefWrapLength(150);
+        room_grid.setPrefWrapLength(210);
 
         // load the image
         Image image = new Image("house2.png");
         // simple displays ImageView the image as is
         ImageView iv1 = new ImageView();
         iv1.setImage(image);
+        iv1.setFitHeight(100);
+        iv1.setFitWidth(100);
+        BorderPane imgPane = new BorderPane();
+        imgPane.setPrefSize(100,100);
+        imgPane.setCenter(iv1);
 
         // Save current state of application before quiting
         Button saveAndQuitButton = new Button("Save and Quit");
@@ -121,16 +127,19 @@ public class StudentHousing extends Application {
 
         // create HBox for the title, key, the room_grid, house.jpeg and saveAndQuitButton
         VBox grid_holder = new VBox();
+        grid_holder.prefWidthProperty().bind(room_grid.prefWidthProperty());
+        grid_holder.prefHeightProperty().bind(room_grid.prefHeightProperty());
         Font font = new Font("Calibri", 20); // set font of heading
         title.setFont(font);
-        grid_holder.getChildren().addAll(title, key_holder, room_grid, iv1, saveAndQuitButton);
-        saveAndQuitButton.setAlignment(Pos.BOTTOM_LEFT);
-        iv1.setFitHeight(50);
-        iv1.setFitWidth(50);
+
+        
+        grid_holder.getChildren().addAll(title, key_holder, room_grid, imgPane, saveAndQuitButton);
+        saveAndQuitButton.setAlignment(Pos.CENTER);
+        
 
         HBox root = new HBox(10);
         root.setSpacing(10);
-        root.setPadding(new Insets(5, 15, 5, 1)); 
+        root.setPadding(new Insets(5, 15, 5, 15)); 
         root.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, new CornerRadii(0), new Insets(0))));
         root.getChildren().addAll(grid_holder, info_holder);
         grid_holder.setMinHeight(root.getHeight()*0.8);
@@ -191,7 +200,7 @@ public class StudentHousing extends Application {
         roomNum = 1;
         for(int i=0; i<noOfRooms;i++){
             Button room_i = new Button("" + roomNum);
-            room_i.setPrefSize(30,30);
+            room_i.setPrefSize(Math.max(400/noOfRooms, 30),Math.max(400/noOfRooms, 30));
             room_i.setOnAction(e ->populateRoomInfo(Integer.parseInt(room_i.getText())));
             roomNum++;
             room_i.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
