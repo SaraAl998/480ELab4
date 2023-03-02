@@ -253,7 +253,7 @@ public class StudentHousing extends Application {
 
         nav_button_holder.getChildren().addAll(updateButton, exitRoomButton);
 
-        if (list.getHousemate(roomNum)!=null){
+        if (list.search(roomNum)!=null){
             Button removeHousemateButton = new Button("Remove Housemate");
             removeHousemateButton.setOnAction(e -> removeHousemate(roomNum));
             nav_button_holder.getChildren().add(removeHousemateButton);
@@ -301,7 +301,7 @@ public class StudentHousing extends Application {
             double amount = Double.parseDouble(textfields.get(3).getText());
             if (amount>0){
                 Payment p = new Payment(month, amount);
-                Housemate h = list.getHousemate(roomNum);
+                Housemate h = list.search(roomNum);
                 h.makePayment(p);
                 populateRoomInfo(roomNum);
             }
