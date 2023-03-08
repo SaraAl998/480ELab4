@@ -465,15 +465,14 @@ private void removeHousemate(){
 }
 
 private void makePayment(ArrayList<TextField> textfields){
-    /* System.out.println("BEFORE");
+    System.out.println("BEFORE");
     for(int i = 1; i <=noOfRooms; i++){
     Housemate h = list.getHousemate(i);
     if (h!=null){
         System.out.println(h.getPayments());
     }
-   } */
+   }
     if ((textfields.get(1).getText() != "") && !curr_month.equals("")){
-        //makePaymentButton.setDisable(false);
         String month = curr_month;
         curr_month="";
         double amount = Double.parseDouble(textfields.get(1).getText());
@@ -485,13 +484,13 @@ private void makePayment(ArrayList<TextField> textfields){
         }
     }
 
-    /* System.out.println("AFTER");
+    System.out.println("AFTER");
     for(int i = 1; i <=noOfRooms; i++){
     Housemate h = list.getHousemate(i);
         if (h!=null){
             System.out.println(h.getPayments());
         }
-    } */
+    }
 }
 
 
