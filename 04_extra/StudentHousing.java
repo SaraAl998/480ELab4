@@ -58,7 +58,7 @@ public class StudentHousing extends Application {
     
     // WIDTH and HEIGHT of GUI stored as constants 
     private final int WIDTH = 600;  // arbitrary number: change and update comments
-    private final int HEIGHT = 400;
+    private final int HEIGHT = 500;
     
     // visual components to COMPLETE, starting code example
     // to have partial code handler working
@@ -72,54 +72,105 @@ public class StudentHousing extends Application {
     private TextArea displayArea2;
     
 /**************** NEW FINAL VARIABLES ADDED ********************************/
-    private String[] labels = new String[]{"Room:    ", "Name:    ", "Month:   ", "Amount: "};
-    private int roomNum = 0;
-    //private int[] roomNums = new int[]{}
+    private String[] labels = new String[]{"Name:       ", "Month:      ", "Amount:   "};
+    private int currRoomNum = 0;
     private VBox info_holder;
     private ArrayList<Button> roomButtonList = new ArrayList<Button>();
     private ComboBox combo_box = new ComboBox();
-    String curr_month = "";
+    private static String curr_month = "";
+    private final int MAX_ROOMS = 35; //max no. of rooms allowed if there is no prior saved info
+    private final int MAX_ROOMS_FROM_SAVED_STATE = 100; //max no. of rooms that can be collected prior saved info
 /*************** START METHOD **********************************************/
     @Override
     /** Initialises the screen 
     *  @param stage:   The scene's stage 
     */
     public void start(Stage stage) {
+
         noOfRooms = getNumberOfRooms(); // call private method below for window
-        if(noOfRooms > 35)
-        {
-            noOfRooms = 35;
-        }
-        // that takes in number of rooms in house 
-        initFromFile(100);
-        int max = 1;
-        for(Housemate h: list.getHousemateList())
-        {
-            if(h.getRoom() > max) {max = h.getRoom();}
-        }
-        if (max > noOfRooms){
-            noOfRooms = max;
-        }
-        initFromFile(noOfRooms);
+        get_saved_info();
+
         // create a VBox to display requested information
         // display a list of the housemates by default
         info_holder = new VBox(10);
-        create_housemate_view(info_holder); // adds a ListView of housemates to the info_holder
+        create_housemate_view(); // adds a ListView of housemates to the info_holder
 
+        title.setFont(new Font("Arial", 20)); // create title
+        BorderPane imgPane = create_img_pane(); //add decoration
         /*create a key explaining 
         * what the colors of the room buttons mean*/
-        HBox key_holder = create_key();
-
-        /* 
-        * create a Pane for buttons for each room
-        * create the buttons for the rooms
-        * and add them to the room_grid's children
-        */
+        VBox key_holder = create_key();
+        // create a Pane for the buttons for each room
         FlowPane room_grid = new FlowPane();
         create_room_buttons(room_grid, noOfRooms);
         recolor_room_buttons(); // recolors buttons based on information from the saved state (if any)
         room_grid.setPrefWrapLength(210);
 
+        // Save current state of application before quiting
+        BorderPane saveAndQuitButtonPane = create_save_and_quit_button();
+
+
+        // create VBox for the title, decoration, key, room_grid, and saveAndQuitButton
+        VBox grid_holder = new VBox();
+        grid_holder.setSpacing(15);
+        grid_holder.getChildren().addAll(title, imgPane, key_holder, room_grid, saveAndQuitButtonPane);
+        
+
+        HBox root = create_root(grid_holder);
+
+        // create the scene
+        Scene scene = new Scene(root, WIDTH, HEIGHT);
+      
+        // call private methods for button event handlers ---> DONE IN HELPER METHODS BELOW
+        // you will need one for each button added: call and complete all the ones provided
+        stage.setResizable(false); // TO AVOID EXTRA CODE FOR RESIZING GRACEFULLY
+        stage.setScene(scene);
+        stage.setTitle("Off-campus Housing Application");
+        stage.show(); 
+        
+    }
+
+/*////////////////////////////////////////////// NEW FUNCTIONS ADDED /////////////////////////////////////////*/
+
+/*************************************** METHODS TO CREATE DEFAULT VIEW ****************************************/
+
+    
+    /*
+    * Method to get the housemate list from a saved file (if any)
+    * @return void
+    */
+    private void get_saved_info(){
+
+        // cap on the number of rooms
+        if(noOfRooms > MAX_ROOMS)
+        {
+            noOfRooms = MAX_ROOMS;
+        }
+
+        // that takes in number of rooms in house
+        initFromFile(MAX_ROOMS_FROM_SAVED_STATE);
+        int max = 1; // at least one room
+        int curr_room=0;
+        for(Housemate h: list.getHousemateList())
+        {
+            curr_room = h.getRoom();
+            if(curr_room > max) {max = curr_room;}
+        }
+
+        // reset no. of rooms if saved state has more rooms than input
+        if (max > noOfRooms){
+            noOfRooms = max;
+        }
+
+        //initFromFile(noOfRooms);
+    }
+
+
+    /*
+    * Method to create the root
+    * @return an HBox
+    */
+    private BorderPane create_img_pane(){
         // load the image
         Image image = new Image("house2.png");
         // simple displays ImageView the image as is
@@ -130,93 +181,98 @@ public class StudentHousing extends Application {
         BorderPane imgPane = new BorderPane();
         imgPane.setPrefSize(100,100);
         imgPane.setCenter(iv1);
+        
+        return imgPane;
+    }
 
-        // Save current state of application before quiting
+    /*
+    * Method to create the save and quit button in a BorderPane
+    * @return an HBox
+    */
+    private BorderPane create_save_and_quit_button(){
         Button saveAndQuitButton = new Button("Save and Quit");
         saveAndQuitButton.setOnAction(e -> saveAndQuitHandler());
         BorderPane saveAndQuitButtonPane = new BorderPane();
         saveAndQuitButtonPane.setPrefSize(100,50);
         saveAndQuitButtonPane.setCenter(saveAndQuitButton);
-
-        // create HBox for the title, key, the room_grid, house.jpeg and saveAndQuitButton
-        VBox grid_holder = new VBox();
         
-        Font font = new Font("Calibri", 20); // set font of heading
-        title.setFont(font);
-        grid_holder.setSpacing(15);
-
-        
-        grid_holder.getChildren().addAll(title, imgPane, key_holder, room_grid, saveAndQuitButtonPane);
-        saveAndQuitButton.setAlignment(Pos.CENTER_RIGHT);
-        
-
-        HBox root = new HBox(10);
-        root.setSpacing(10);
-        root.setPadding(new Insets(5, 15, 5, 15)); 
-        root.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, new CornerRadii(0), new Insets(0))));
-        root.getChildren().addAll(grid_holder, info_holder);
-        grid_holder.setMinHeight(root.getHeight()*0.8);
-        grid_holder.setMinWidth(root.getWidth()*0.8);
-        // create the scene
-        Scene scene = new Scene(root, WIDTH, HEIGHT);
-      
-        // call private methods for button event handlers
-        // you will need one for each button added: call and complete all the ones provided
-        stage.setResizable(false);
-        stage.setScene(scene);
-        stage.setTitle("Off-campus Housing Application");
-        stage.show(); 
-        
+        return saveAndQuitButtonPane;
     }
 
-/*************************************** NEW FUNCTIONS ADDED ****************************************/
+
     /*
-    * Method to create the menu of months
-    * @return a ComboBox object 
+    * Method to create the root
+    * @return an HBox
     */
-    private ComboBox create_month_menu(){
-         String[] months =
-         { "January", "February", "March", "April", "May", "June", 
-         "July", "August", "September", "October", "November", "December"};
-
-    // Create a combo box
-    ComboBox combo_box = new ComboBox(FXCollections.observableArrayList(months));
-    combo_box.valueProperty().addListener(new ChangeListener<String>() {
-        @Override public void changed(ObservableValue ov, String t, String t1) {
-            curr_month=t1;
-        }    
-    });
-    return combo_box;
-    }
+    private HBox create_root(VBox grid_holder){
+       HBox root = new HBox(10);
+       root.setSpacing(10);
+       root.setPadding(new Insets(5, 15, 5, 15)); 
+       root.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, new CornerRadii(0), new Insets(0))));
+       root.getChildren().addAll(grid_holder, info_holder);
+       grid_holder.setMinHeight(root.getHeight()*0.8);
+       grid_holder.setMinWidth(root.getWidth()*0.8);
+       
+       return root;
+   }
 
 
     /*
     * Method to recolor buttons based on occupancy
     * @return void
     */
-    private HBox create_key(){
+    private VBox create_key(){
         Label l1 = new Label("Occupied");
-        l1.setBackground(new Background(new BackgroundFill(Color.RED, new CornerRadii(0), new Insets(1))));
+        l1.setFont(new Font("Arial", 20));
+        l1.setBackground(new Background(new BackgroundFill(Color.GRAY, new CornerRadii(0), new Insets(1))));
 
         Label l2 = new Label("Unoccupied");
-        l2.setBackground(new Background(new BackgroundFill(Color.YELLOWGREEN, new CornerRadii(0), new Insets(1))));
+        l2.setFont(new Font("Arial", 20));
+        l2.setBackground(new Background(new BackgroundFill(Color.ORCHID, new CornerRadii(0), new Insets(1))));
 
-        HBox key_holder = new HBox();
+        VBox key_holder = new VBox();
         key_holder.getChildren().addAll(l1, l2);
 
         return key_holder;
     }
 
-    /*
+
+    /**
+    * Method to create a button for each room in the house
+    * @return array of room buttons
+    */
+    private void create_room_buttons(FlowPane room_grid, int noOfRooms){
+        int roomNum = 1;
+        for(int i=0; i<noOfRooms;i++){
+            Button room_i = new Button("" + roomNum);
+            room_i.setPrefSize(Math.max(400/noOfRooms, 30),Math.max(400/noOfRooms, 30));
+            room_i.setOnAction(e -> {currRoomNum = Integer.parseInt(room_i.getText()); 
+                unselect_all_room_buttons(); 
+                room_i.setStyle("-fx-border-color: black;"); 
+                populateRoomInfo();});
+            roomNum++;
+            room_i.setBackground(new Background(new BackgroundFill(Color.ORCHID, new CornerRadii(10), Insets.EMPTY)));
+            room_grid.getChildren().add(room_i);
+            roomButtonList.add(room_i);
+        }
+    }
+
+    private void unselect_all_room_buttons(){
+        for(Button button:roomButtonList){
+            button.setStyle("--fx-background-color: transparent");
+        }
+    }
+
+     /*
     * Method to recolor buttons based on occupancy
     * @return void
     */
     private void recolor_room_buttons(){
-        roomNum = 1;
+        int roomNum = 1;
         for(int i=0; i<noOfRooms;i++){
             Button room_i = roomButtonList.get(i);
             if (list.search(roomNum) != null){
-            room_i.setBackground(new Background(new BackgroundFill(Color.RED, new CornerRadii(10), Insets.EMPTY)));
+            room_i.setBackground(new Background(new BackgroundFill(Color.GRAY, new CornerRadii(10), Insets.EMPTY)));
             }
             
             roomNum++;
@@ -224,28 +280,12 @@ public class StudentHousing extends Application {
         roomNum=0;
     }
 
-    /**
-    * Method to create a button for each room in the house
-    * @return array of room buttons
-    */
-    private void create_room_buttons(FlowPane room_grid, int noOfRooms){
-        roomNum = 1;
-        for(int i=0; i<noOfRooms;i++){
-            Button room_i = new Button("" + roomNum);
-            room_i.setPrefSize(Math.max(400/noOfRooms, 30),Math.max(400/noOfRooms, 30));
-            room_i.setOnAction(e ->populateRoomInfo(Integer.parseInt(room_i.getText())));
-            roomNum++;
-            room_i.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
-            room_grid.getChildren().add(room_i);
-            roomButtonList.add(room_i);
-        }
-        roomNum=0;
-    }
+
     /**
     * Method to create a listview of all the housemates
     * 
     */
-    private void create_housemate_view(VBox info_holder){
+    private void create_housemate_view(){
         ArrayList<Housemate> h = HousemateList.getHousemateList();
         ObservableList<Housemate> observable_housemateList = FXCollections.observableArrayList(h);
         ListView<Housemate> housemate_view = new ListView<Housemate>();
@@ -260,13 +300,132 @@ public class StudentHousing extends Application {
         info_holder.getChildren().add(table);
     }
 
+
+
+
+/************************************ METHODS TO DISPLAY A SPECIFIC ROOM'S INFO ******************************/
+
     /**
+    * Handler for the buttons corresponding to each room
+    * @return void
+    */
+    private void populateRoomInfo(){
+
+        info_holder.getChildren().clear();
+        //int roomNum = currRoomNum;
+
+        GridPane textPane = new GridPane();
+        VBox textBox = new VBox();
+        ArrayList<TextField> textfields = create_user_input_section(textBox);
+        GridPane.setConstraints(textBox, 0, 0);
+        Label numLabel = new Label("   Room "+currRoomNum);
+        numLabel.setFont(new Font("Arial", 30));
+        GridPane.setConstraints(numLabel, 10, 0);
+        textPane.getChildren().addAll(textBox, numLabel);
+        info_holder.getChildren().add(textPane);
+
+        Button[] nav_buttons = create_room_nav_buttons(textfields);
+
+        Housemate h = list.search(currRoomNum);
+        if (h!=null){create_payment_view(h);}
+    }
+
+
+
+    /**
+    * Method to create buttons for the following functionality:
+    * 1. Update (adding a new roommate using the "name" Textfield)
+    * 2. Exit (leave the specific room's info and go back to default view of the housemate list)
+    * 3. Make Payment
+    * 4. Remove existing housemate from the room
+    * @return an array of buttons
+    */
+    private Button[] create_room_nav_buttons(ArrayList<TextField> textfields){
+        Button[] nav_buttons = new Button[3];
+        HBox nav_button_holder = new HBox();
+
+        Button updateButton = new Button("Update");
+        updateButton.setOnAction( e -> updateRoomInfo(textfields));
+        nav_buttons[0]= updateButton;
+
+        Button exitRoomButton = new Button("Exit Room");
+        exitRoomButton.setOnAction( e -> exit_room());
+        nav_buttons[1]= exitRoomButton;
+
+        nav_button_holder.getChildren().addAll(updateButton, exitRoomButton);
+
+        if (list.search(currRoomNum)!=null){
+            Button removeHousemateButton = new Button("Remove Housemate");
+            removeHousemateButton.setOnAction(e -> removeHousemate());
+            nav_button_holder.getChildren().add(removeHousemateButton);
+
+            Button makePaymentButton = new Button("Make Payment");
+            String month = "";
+            double amount = 0;
+            makePaymentButton.setOnAction(e -> {makePayment(textfields);});
+            nav_button_holder.getChildren().add(makePaymentButton);
+        }
+
+        info_holder.getChildren().add(nav_button_holder);
+        return nav_buttons;
+
+    }
+
+
+    /**
+    * Method to create text fields for user input
+    * @return array of buttons to add user input from corresponding textfields
+    */
+    private ArrayList<TextField> create_user_input_section(VBox textBox){
+        ArrayList<TextField> textfields = new ArrayList<TextField>(labels.length);
+        int buttonNum = 0;
+        Housemate currHousemate = list.search(currRoomNum);
+        for(String s: labels){
+            Label l = new Label(s);
+            TextField t = new TextField("");
+            if (s.equals("Name:       ")){
+                if (currHousemate==null){t.setText("Unoccupied Room");}
+                else{t.setText(currHousemate.getName());t.setEditable(false);}
+            } 
+            if (!(s.equals("Month:      "))){textfields.add(t);}
+            else{combo_box = create_month_menu();}
+
+            HBox label_and_textfield_holder = new HBox();
+            if (!s.equals("Month:      ")){label_and_textfield_holder.getChildren().addAll(l, t);}
+            else{label_and_textfield_holder.getChildren().addAll(l, combo_box);}
+            buttonNum++;
+            textBox.getChildren().add(label_and_textfield_holder);
+            label_and_textfield_holder.setAlignment(Pos.TOP_LEFT);
+        }
+
+        return textfields;
+    }
+
+    /*
+    * Method to create the menu of months
+    * @return a ComboBox object 
+    */
+    private ComboBox create_month_menu(){
+        String[] months =
+        { "January", "February", "March", "April", "May", "June", 
+        "July", "August", "September", "October", "November", "December"};
+
+   // Create a combo box
+   ComboBox combo_box = new ComboBox(FXCollections.observableArrayList(months));
+   combo_box.valueProperty().addListener(new ChangeListener<String>() {
+       @Override public void changed(ObservableValue ov, String t, String t1) {
+           curr_month=t1;
+       }    
+   });
+   return combo_box;
+   }
+
+   /**
     * Method to create a listview of payments
     * 
     */
     private void create_payment_view(Housemate h){
         ArrayList<Payment> p = h.getPayments().getPaymentList();
-        //System.out.println(p);
         ObservableList<Payment> observable_p = FXCollections.observableArrayList(p);
         TableView<Payment> paymentTable = new TableView<Payment>();
         paymentTable.setItems(observable_p);
@@ -278,113 +437,63 @@ public class StudentHousing extends Application {
         info_holder.getChildren().add(paymentTable);
     }
 
-    private void populateRoomInfo(int roomNum){
-        info_holder.getChildren().clear();
-        int roomNumCopy = roomNum;
-        ArrayList<TextField> textfields = create_user_input_section(roomNumCopy);
-        Button[] nav_buttons = create_room_nav_buttons(roomNum, textfields);
-        if (list.search(roomNum)!=null){create_payment_view(list.search(roomNum));}
+/********************************* METHODS FOR FUNCTIONALITY FOR SPECIFIC ROOMS *****************************/
+
+private void updateRoomInfo(ArrayList<TextField> textfields){
+    String name = textfields.get(0).getText();
+    if (!name.equals("Unoccupied Room")){
+        Housemate newHousemate = new Housemate(name, currRoomNum);
+        list.addHousemate(newHousemate);
+        Button room_button = roomButtonList.get(currRoomNum-1);
+        room_button.setBackground(new Background(new BackgroundFill(Color.GRAY, new CornerRadii(10), Insets.EMPTY)));
     }
+    populateRoomInfo();
+}
 
-    private Button[] create_room_nav_buttons(int roomNum, ArrayList<TextField> textfields){
-        Button[] nav_buttons = new Button[3];
-        HBox nav_button_holder = new HBox();
+private void exit_room(){
+    //info_holder = new VBox();
+    info_holder.getChildren().clear();
+    create_housemate_view();
+    unselect_all_room_buttons();
+}
 
-        Button updateButton = new Button("Update");
-        updateButton.setOnAction( e -> updateRoomInfo(roomNum, textfields));
-        nav_buttons[0]= updateButton;
+private void removeHousemate(){
+    list.removeHousemate(currRoomNum);
+    populateRoomInfo();
+    Button roomButton = roomButtonList.get(currRoomNum-1);
+    roomButton.setBackground(new Background(new BackgroundFill(Color.ORCHID, new CornerRadii(10), Insets.EMPTY)));
+}
 
-        Button exitRoomButton = new Button("Exit Room");
-        exitRoomButton.setOnAction( e -> exit_room());
-        nav_buttons[1]= exitRoomButton;
-
-        nav_button_holder.getChildren().addAll(updateButton, exitRoomButton);
-
-        if (list.search(roomNum)!=null){
-            Button removeHousemateButton = new Button("Remove Housemate");
-            removeHousemateButton.setOnAction(e -> removeHousemate(roomNum));
-            nav_button_holder.getChildren().add(removeHousemateButton);
-
-            Button makePaymentButton = new Button("Make Payment");
-            String month = "";
-            double amount = 0;
-            makePaymentButton.setOnAction(e -> makePayment(roomNum, textfields));
-            nav_button_holder.getChildren().add(makePaymentButton);
-        }
-
-        info_holder.getChildren().add(nav_button_holder);
-        return nav_buttons;
-
+private void makePayment(ArrayList<TextField> textfields){
+    /* System.out.println("BEFORE");
+    for(int i = 1; i <=noOfRooms; i++){
+    Housemate h = list.getHousemate(i);
+    if (h!=null){
+        System.out.println(h.getPayments());
     }
-
-    private void updateRoomInfo(int roomNum, ArrayList<TextField> textfields){
-        String name = textfields.get(1).getText();
-        if (!name.isEmpty()){
-            Housemate newHousemate = new Housemate(name, roomNum);
-            list.addHousemate(newHousemate);
-            Button room_button = roomButtonList.get(roomNum-1);
-            room_button.setBackground(new Background(new BackgroundFill(Color.RED, new CornerRadii(10), Insets.EMPTY)));
-        }
-        populateRoomInfo(roomNum);
-    }
-
-    private void exit_room(){
-        //info_holder = new VBox();
-        info_holder.getChildren().clear();
-        create_housemate_view(info_holder);
-    }
-
-    private void removeHousemate(int roomNum){
-        list.removeHousemate(roomNum);
-        populateRoomInfo(roomNum);
-        Button roomButton = roomButtonList.get(roomNum-1);
-        roomButton.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW, new CornerRadii(10), Insets.EMPTY)));
-    }
-
-    private void makePayment(int roomNum, ArrayList<TextField> textfields){
-        if ((textfields.get(2).getText() != "") && !curr_month.equals("")){
-            //makePaymentButton.setDisable(false);
-            String month = curr_month;
-            curr_month="";
-            double amount = Double.parseDouble(textfields.get(2).getText());
-            if (amount>0){
-                Payment p = new Payment(month, amount);
-                Housemate h = list.search(roomNum);
-                h.makePayment(p);
-                populateRoomInfo(roomNum);
-            }
+   } */
+    if ((textfields.get(1).getText() != "") && !curr_month.equals("")){
+        //makePaymentButton.setDisable(false);
+        String month = curr_month;
+        curr_month="";
+        double amount = Double.parseDouble(textfields.get(1).getText());
+        if (amount>0){
+            Payment p = new Payment(month, amount);
+            Housemate h = list.search(currRoomNum);
+            h.makePayment(p);
+            populateRoomInfo();
         }
     }
 
-
-    /**
-    * Method to create text fields for user input
-    * @return array of buttons to add user input from corresponding textfields
-    */
-    private ArrayList<TextField> create_user_input_section(int roomNum){
-        ArrayList<TextField> textfields = new ArrayList<TextField>(labels.length);
-        int buttonNum = 0;
-        for(String s: labels){
-            Label l = new Label(s);
-            TextField t = new TextField("");
-            if (s.equals("Room:    ")){t.setEditable(false); t.setText(""+ roomNum);}
-            if (s.equals("Name:    ")){
-                if (list.search(roomNum)==null){t.setText("Unoccupied Room");}
-                else{t.setText(list.search(roomNum).getName());t.setEditable(false);}
-            } 
-            if (!(s.equals("Month:   "))){textfields.add(t);}
-            else{combo_box = create_month_menu();}
-
-            HBox h = new HBox();
-            if (!s.equals("Month:   ")){h.getChildren().addAll(l, t);}
-            else{h.getChildren().addAll(l, combo_box);}
-            buttonNum++;
-            info_holder.getChildren().add(h);
-            h.setAlignment(Pos.TOP_LEFT);
+    /* System.out.println("AFTER");
+    for(int i = 1; i <=noOfRooms; i++){
+    Housemate h = list.getHousemate(i);
+        if (h!=null){
+            System.out.println(h.getPayments());
         }
+    } */
+}
 
-        return textfields;
-    }
 
 /*************************************** FUNCTIONS GIVEN TO US ********************************************************/
 
